@@ -1,10 +1,6 @@
 
 let countryJSON = ('assets/js/countryBorders.geo.json');
-let lat;
-let lng;
-let currentLocation = navigator.geolocation.getCurrentPosition((result)=>{
-    result['coords']['latitude'];
-})
+
 
 
 var map = L.map("myMap").setView([0,0], 1);
@@ -13,10 +9,14 @@ L.tileLayer("https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=fKzuYDqbL
     attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
 }).addTo(map);
 
-
+// adds marker to current location of device 
+navigator.geolocation.getCurrentPosition((result)=>{
+    L.marker([result['coords']['latitude'], result['coords']['longitude']]).addTo(map);
+})
 
 
 $(document).ready(function(){
+    // Adds country names in select tag from json file
     $('nav').html('<label for="country">Choose a country:  </label>');
     $('nav').append('<select name="country" id="country" onmousedown="if(this.options.length > 5){this.size = 5}" onchange="this.size=0">');
     $.getJSON(countryJSON,function(countries){
