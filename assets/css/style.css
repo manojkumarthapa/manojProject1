@@ -35,3 +35,20 @@ nav > select {
 #viewLatlng {
   cursor: pointer;
 }
+
+#currencyCountryBase > h3,
+#currencyCountryExchanged > h3 {
+  text-align: center;
+}
+
+#currencyCountryBase,
+#currencySendAmt,
+#currencyCountryExchanged,
+#currencyReceiveAmt {
+  width: 100px;
+}
+
+#currencyValue {
+  width: 200px;
+  height: 1.5em;
+}

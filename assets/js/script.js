@@ -1,4 +1,5 @@
 let countryJSON = "assets/js/countryBorders.geo.json";
+let countryLocation = 'assets/js/countryInfo.json';
 
 let map = L.map("myMap").setView([0, 0], 2);
 
@@ -17,6 +18,18 @@ var options = {
   maximumAge: 0
 };
 
+let countryInfoArray = [];
+
+// CountryInfo
+$.getJSON(countryLocation, function(item){
+  $(item).each(function(x,y){
+    countryInfoArray.push(y);
+  })
+})
+
+console.log(countryInfoArray);
+
+
 // Weather API
 function weather(lat, lng){
   $.ajax({
@@ -27,7 +40,6 @@ function weather(lat, lng){
        'lng': lng
     },
     success: function(item){
-      console.log(item);
       let country = item['data']['sys']['country'];
       let city = item['data']['name'];
       let temperature = item['data']['main']['temp'];
@@ -41,6 +53,11 @@ function weather(lat, lng){
         <h3>Weather: ${weather}</h3>
         `
       );
+    //   let current = $('#result > h3:first-child').text().slice(-3).trim();
+    //   console.log(current);
+    //   console.log(Object.keys(countryInfoArray['0']));
+    //   let gg = Object.keys(countryInfoArray['0']);
+    //   console.log(gg.indexOf(current));
     }
   })
 }
@@ -55,7 +72,6 @@ function getTime(lat, lng){
        'lng': lng
     },
     success: function(item){
-      console.log(item);
       let time = item['data']['time'].slice(-6);
       $('#result').append(
         `
@@ -64,6 +80,72 @@ function getTime(lat, lng){
     }
   })
 }
+
+// Currency API
+function getCurrencyRates(){
+  
+  $.ajax({
+    url: 'assets/php/currencyRates.php',
+    method: 'GET',
+    success: function(item){
+      let rates=item['rates'];
+      let countryShortHand = Object.keys(rates);
+      let fromSelected = '';
+      let toSelected = '';
+      $('#currencyCountryBase').click(function(){
+        fromSelected = $('#currencyCountryBase').val();
+      });
+
+      $('#currencyCountryExchanged').click(function(){
+        toSelected = $('#currencyCountryExchanged').val();
+      });
+
+
+      $('#currencySendAmt').val(1);
+      $('#currencyReceiveAmt').val(1);
+      for(let j =0; j< countryShortHand.length;j++){
+        let code = countryShortHand[j];
+        $('#currencyCountryBase').append(`
+        <option value=${code}>${code}</option>
+        `);
+      }
+      for(let j =0; j< countryShortHand.length;j++){
+        let code = countryShortHand[j];
+        $('#currencyCountryExchanged').append(`
+        <option value=${code}>${code}</option>
+        `);
+      }
+    }
+    
+  })
+
+  
+}
+// Updates the value of the currencey
+function updateRateFrom(currencyFrom, currencyTo, newCurrencyFrom){
+  $.ajax({
+        url: 'assets/php/currencyRates2.php',
+        method: 'GET',
+        data: {
+          'from': currencyFrom,
+          'to': currencyTo
+        },
+        success: function(item){
+          let rate = `${currencyFrom}_${currencyTo}`;
+          let receiving = item[rate] * newCurrencyFrom;
+          $('#currencyValue').text(receiving);
+          console.log(receiving);
+        }
+      })
+}
+
+
+
+
+// Clear Result section
+function clearResult(){
+  $('#result').html("");
+};
 
 
 
@@ -89,6 +171,7 @@ navigator.geolocation.getCurrentPosition((result, options) => {
   );
   weather(result["coords"]["latitude"],result["coords"]["longitude"]);
   getTime(result["coords"]["latitude"],result["coords"]["longitude"]);
+  getCurrencyRates();
   markers.addLayer(L.marker([result["coords"]["latitude"], result["coords"]["longitude"]]));
 });
 
@@ -111,22 +194,12 @@ L.easyButton('fa-sliders-h', function(){
 // Adds sidebar
 
 var sidebar = L.control.sidebar('sidebar', {
-    position: 'left',
-    // closeButton: false
+    position: 'left'
 });
 map.addControl(sidebar);
 setTimeout(function () {
     sidebar.show();
 }, 500);
-
-
-
-
-
-
-
-
-
 
 $(document).ready(function () {
   // Adds country names in select tag from json file
@@ -161,6 +234,38 @@ $(document).ready(function () {
     weather(lat,lng);
     getTime(lat,lng);
   });
+
+
+  $('#currencyCountryBase').click(function(){
+    let countryBase = $('#currencyCountryBase').val();
+    let countryExchanged = $('#currencyCountryExchanged').val();
+    let currencySendAmt = $('#currencySendAmt').val();
+    updateRateFrom(countryBase, countryExchanged,currencySendAmt);
+  });
+
+  $('#currencySendAmt').change(function(){
+    let countryBase = $('#currencyCountryBase').val();
+    let countryExchanged = $('#currencyCountryExchanged').val();
+    let currencySendAmt = $('#currencySendAmt').val();
+    updateRateFrom(countryBase, countryExchanged,currencySendAmt);
+  })
+
+
+  $('#currencyCountryExchanged').click(function(){
+    let countryBase = $('#currencyCountryBase').val();
+    let countryExchanged = $('#currencyCountryExchanged').val();
+    let currencySendAmt = $('#currencySendAmt').val();
+    updateRateFrom(countryBase, countryExchanged,currencySendAmt);
+  });
+ 
+  // nav select tag
+  $('#country').click(function(){
+    console.log($('#country').val());
+  });
+
+
+
+
 
 
 
