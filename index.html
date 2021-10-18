@@ -5,7 +5,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    
+    <link rel="stylesheet" href="assets/leaflet/MarkerCluster.css">
+    <link rel="stylesheet" href="assets/leaflet/MarkerCluster.Default.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css">
+    <link rel="stylesheet" href="assets/leaflet/easy-button.css">
+    <link rel="stylesheet" href="assets/leaflet/L.Control.Sidebar.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <title>Manoj Project 1</title>
 </head>
@@ -15,12 +19,35 @@
             
         </nav>
         <div id="myMap">
+            <div id="sidebar">
+                <h1>Controls</h1>
+                <span class="latlng">
+                    <label for="lat">Latitude:&nbsp;&nbsp;&nbsp; </label>
+                    <input type="number" name="lat" id="lat">
+                </span><br>
+                <span class="latlng">
+                    <label for="lng">Longitude: </label>
+                    <input type="number" name="lng" id="lng">
+                </span>
+                <div>
+                    <button id="viewLatlng">View On Map</button>
+                    <button id=addMarker>Add Marker</button>
+                </div>
+                <div id="result">
 
+                </div>
+            </div>
         </div>
+        
     </main>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/"></script>
+    <script src="assets/leaflet/easy-button.js"></script>
+    <script src="assets/leaflet/L.Control.Sidebar.js"></script>
+    <script src="assets/leaflet/leaflet.markercluster.js"></script>
     <script src="assets/js/script.js"></script>
 </body>
 </html>
