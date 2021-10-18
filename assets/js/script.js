@@ -11,6 +11,9 @@ L.tileLayer(
       '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
   }
 ).addTo(map);
+L.control.mousePosition().addTo(map);
+var marker_controls = new L.Control.SimpleMarkers();
+map.addControl(marker_controls);
 
 var options = {
   enableHighAccuracy: true,
@@ -19,6 +22,8 @@ var options = {
 };
 
 let countryInfoArray = [];
+
+
 
 // CountryInfo
 $.getJSON(countryLocation, function(item){
@@ -260,7 +265,12 @@ $(document).ready(function () {
  
   // nav select tag
   $('#country').click(function(){
+    let countryValue = $('#country').val();
     console.log($('#country').val());
+    $.getJSON(countryJSON, function(country){
+      console.log(country['features'])
+    })
+
   });
 
 
