@@ -1,7 +1,17 @@
 let countryJSON = "assets/js/countryBorders.geo.json";
 let countryLocation = 'assets/js/countryInfo.json';
 
+
+
+
+
+// MarkerCluster
+var markers = L.markerClusterGroup();
+
+
+
 let map = L.map("myMap").setView([0, 0], 2);
+// map.addLayer(markers);
 
 
 L.tileLayer(
@@ -11,9 +21,14 @@ L.tileLayer(
       '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
   }
 ).addTo(map);
+
+// Add mouse Position
 L.control.mousePosition().addTo(map);
-var marker_controls = new L.Control.SimpleMarkers();
-map.addControl(marker_controls);
+
+
+
+
+
 
 var options = {
   enableHighAccuracy: true,
@@ -58,11 +73,6 @@ function weather(lat, lng){
         <h3>Weather: ${weather}</h3>
         `
       );
-    //   let current = $('#result > h3:first-child').text().slice(-3).trim();
-    //   console.log(current);
-    //   console.log(Object.keys(countryInfoArray['0']));
-    //   let gg = Object.keys(countryInfoArray['0']);
-    //   console.log(gg.indexOf(current));
     }
   })
 }
@@ -153,15 +163,15 @@ function clearResult(){
 };
 
 
+// Country in index
+let countryIndex = [];
 
-// MarkerCluster
-var markers = L.markerClusterGroup({
-  zoomToBoundsOnClick: true,
-  showCoverageOnHover: true,
-  animate: true
+$.getJSON(countryJSON, function(country){
+  for(let x=0; x < country['features'].length; x++){
+    countryIndex.push(country['features'][x]['properties']['name']);
+  }
+})
 
-});
-map.addLayer(markers);
 
 
 
@@ -171,13 +181,11 @@ map.addLayer(markers);
 
 // adds marker to current location of device
 navigator.geolocation.getCurrentPosition((result, options) => {
-  L.marker([result["coords"]["latitude"], result["coords"]["longitude"]]).addTo(
-    map
-  );
   weather(result["coords"]["latitude"],result["coords"]["longitude"]);
   getTime(result["coords"]["latitude"],result["coords"]["longitude"]);
   getCurrencyRates();
   markers.addLayer(L.marker([result["coords"]["latitude"], result["coords"]["longitude"]]));
+  map.addLayer(markers);
 });
 
 
@@ -188,7 +196,8 @@ L.easyButton('fa-globe', function(){
     navigator.geolocation.getCurrentPosition((result ,options)=>{
       $('#lat').val(result['coords']['latitude']);
       $('#lng').val(result['coords']['longitude']);
-      map.setView([result['coords']['latitude'],result['coords']['longitude']],16);
+      map.setView([result['coords']['latitude'],result['coords']['longitude']],16); 
+            
     })
 }).addTo(map);
 
@@ -208,10 +217,10 @@ setTimeout(function () {
 
 $(document).ready(function () {
   // Adds country names in select tag from json file
-  $("nav").html('<label for="country">Choose a country:  </label>');
-  $("nav").append(
-    '<select name="country" id="country" onmousedown="if(this.options.length > 5){this.size = 5}" onchange="this.size=0">'
-  );
+  // $("nav").html('<label for="country">Choose a country:  </label>');
+  // $("nav").append(
+  //   '<select name="country" id="country" onmousedown="if(this.options.length > 5){this.size = 5}" onchange="this.size=0">'
+  // );
   $.getJSON(countryJSON, function (countries) {
     $(countries["features"]).each(function (numb, data) {
       // Cant add img beside option
@@ -232,8 +241,9 @@ $(document).ready(function () {
     let lat = $('#lat').val();
     let lng = $('#lng').val();
     map.setView([lat,lng],13);
-    L.marker([lat, lng]).addTo(map)
+    // L.marker([lat, lng]).addTo(map)
     markers.addLayer(L.marker([lat, lng]));
+    map.addLayer(markers);
     $('#lat').val('');
     $('#lng').val('');
     weather(lat,lng);
@@ -266,12 +276,47 @@ $(document).ready(function () {
   // nav select tag
   $('#country').click(function(){
     let countryValue = $('#country').val();
-    console.log($('#country').val());
+    // console.log($('#country').val());
+    // function findLength(item1, item2){
+    //   let item1Length = item1.length;
+    //   let slicedItem = item1.slice(0, item1Length+1);
+    //   if(item2.length <= item1Length && item2 == item1[slicedItem]){
+    //     return item2;
+    //   }
+    // }
+
+    // let splittedValue = countryValue.split(" ")[0];
+    // console.log(typeof(splittedValue));
+
+    // console.log(countryValueLength);
+    // for(let x=0; x<= countryIndex.length;x++){
+    //   let jpt = countryIndex[x].substr(0,countryValueLength);
+    //   console.log(`SUBSTR: ${jpt}`)
+    //   if(jpt == countryValue){
+    //     theIndex = countryIndex.indexOf(jpt);
+    //   }
+    // }
+    // console.log(theIndex)
+    
     $.getJSON(countryJSON, function(country){
-      console.log(country['features'])
+      // console.log(countryIndex)
+      // console.log(countryValue)
+      for(let x=0; x<countryIndex.length; x++){
+        if(countryIndex[x].startsWith(countryValue)){
+          // console.log(`This bitch: ${countryIndex[x]}`);
+          countryValue = countryIndex[x];
+          // let asd = countryIndex[countryValue];
+          let index = countryIndex.indexOf(countryValue);
+          console.log(country['features'][index]);
+        }
+        
+      }
+      
+      
     })
 
   });
+
 
 
 

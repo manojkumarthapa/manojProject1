@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
       rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
-    />
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <link rel="stylesheet" href="assets/leaflet/MarkerCluster.css" />
     <link rel="stylesheet" href="assets/leaflet/MarkerCluster.Default.css" />
     <link
@@ -23,7 +22,10 @@
   </head>
   <body>
     <main>
-      <nav></nav>
+      <nav>
+        <label for="country">Choose a country: </label>
+        <select name="country" id="country" onmousedown="if(this.options.length > 5){this.size = 5}" onchange="this.size=0"></select>
+      </nav>
       <div id="myMap">
         <div id="sidebar">
           <h1>Controls</h1>
@@ -37,7 +39,7 @@
           </span>
           <div>
             <button id="viewLatlng">View On Map</button>
-            <!-- <button id="addMarker">Add Marker</button> -->
+            <button id="addMarker">Add Marker</button>
           </div>
           <div id="currencyBase">
             <h3>Currency From</h3>
