@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
       rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    />
     <link rel="stylesheet" href="assets/leaflet/MarkerCluster.css" />
     <link rel="stylesheet" href="assets/leaflet/MarkerCluster.Default.css" />
     <link
@@ -15,8 +16,8 @@
     />
     <link rel="stylesheet" href="assets/leaflet/easy-button.css" />
     <link rel="stylesheet" href="assets/leaflet/L.Control.Sidebar.css" />
-    <link rel="stylesheet" href="assets/leaflet/L.Control.MousePosition.css">
-    <link rel="stylesheet" href="assets/leaflet/Control.SimpleMarkers.css">
+    <link rel="stylesheet" href="assets/leaflet/L.Control.MousePosition.css" />
+    <link rel="stylesheet" href="assets/leaflet/Control.SimpleMarkers.css" />
     <link rel="stylesheet" href="assets/css/style.css" />
     <title>Manoj Project 1</title>
   </head>
@@ -24,7 +25,12 @@
     <main>
       <nav>
         <label for="country">Choose a country: </label>
-        <select name="country" id="country" onmousedown="if(this.options.length > 5){this.size = 5}" onchange="this.size=0"></select>
+        <select
+          name="country"
+          id="country"
+          onmousedown="if(this.options.length > 5){this.size = 5}"
+          onchange="this.size=0"
+        ></select>
       </nav>
       <div id="myMap">
         <div id="sidebar">
