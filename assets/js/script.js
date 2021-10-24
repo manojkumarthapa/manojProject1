@@ -65,7 +65,7 @@ function weather(lat, lng) {
       let temperature = item['data']['main']['temp'];
       let weather = item['data']['weather'][0]['description'];
 
-      $('#result').html(
+      $('#result').append(
         `
         <h3>Country: ${country}</h3>
         <h3>City: ${city}</h3>
@@ -154,6 +154,32 @@ function updateRateFrom(currencyFrom, currencyTo, newCurrencyFrom) {
   })
 }
 
+// wiki api
+function wiki(lat, lng){
+  $.ajax({
+    url: 'assets/php/wiki.php',
+    method: 'GET',
+    data: {
+      'lat': lat,
+      'lng': lng
+    },
+    success: function(item){
+      console.log(item);
+      for(let x = 0; x< item['geonames'].length; x++){
+        $('#result').append(`
+        <details>
+        <summary>${item['geonames'][x]['title']}</summary>
+        <p>${item['geonames'][x]['summary']}</p>
+        <a href=http://${item['geonames'][x]['wikipediaUrl']} target="_blank">Click for more info</a>
+        </details> 
+        `)
+      }
+    }
+  })
+}
+
+
+
 // Find Lat and Lng api from OpenCage
 function findLatAndLng(city, country){
   if(city.search(' ')){
@@ -173,33 +199,23 @@ function findLatAndLng(city, country){
       'country' : country
     },
     success: function(item){
-      // console.log(item);
-      // return item['results'];
-      console.log(item['results'][0]['geometry']['lat'])
+    //  let theResult =  wiki(item['results'][0]['geometry']['lat'],item['results'][0]['geometry']['lng'])
+    //   console.log(theResult);
+    // console.log(`Lat: ${item['results'][0]['geometry']['lat']}`)
+    // console.log(`Lng: ${item['results'][0]['geometry']['lng']}`)
+
+    let theLat = item['results'][0]['geometry']['lat'];
+    let theLng = item['results'][0]['geometry']['lng']
+    console.log(item);
+    weather(theLat, theLng);
+    getTime(theLat, theLng);
+    wiki(theLat, theLng);
+
     }
   })
 }
 
-// wiki api
-function wiki(lat, lng){
-  $.ajax({
-    url: 'assets/php/wiki.php',
-    method: 'GET',
-    data: {
-      'lat': lat,
-      'lng': lng
-    },
-    success: function(item){
-      for(let x = 0; x<= item.length; x++){
-        $('#result').append(`
-        <h3>${item['geoname']['title']}</h3>
-        <p>${item['geoname']['summary']}</p>
-        <a href=${item['geoname']['wikipediaUrl']}Click for more info</a>
-        `)
-      }
-    }
-  })
-}
+
 
 
 
@@ -269,9 +285,9 @@ $(document).ready(function () {
       // numb = '<img src="https://www.countryflags.io/'+ data['properties']['iso_a2']+'/shiny/16.png">'
       // console.log(numb);
       $("#country").append(
-        '<option class = "country" value=' +
-        data["properties"]["name"] +
-        ">" +
+        '<option class = "country" value=' + '"'+
+        data["properties"]["name"] + '"'+
+        '>' +
         data["properties"]["name"] +
         "</option>"
       );
@@ -318,18 +334,16 @@ $(document).ready(function () {
   // nav select tag
   $('#country').click(function () {
     let countryValue = $('#country').val();
-
-    
     $.getJSON(countryJSON, function (country) {
-
+      console.log(`The countryValue ${countryValue}`)
       for (let x = 0; x < countryIndex.length; x++) {
         if (countryIndex[x].startsWith(countryValue)) {
           countryValue = countryIndex[x];
           let index = countryIndex.indexOf(countryValue);
+          let jpt = country['features'][index];
           let knn = country['features'][index]['geometry'];
           let iso2 = country['features'][index]['properties']['iso_a2'];
-          let countryName ="";
-          let capitalName ="";
+
           $.ajax({
             url: 'assets/php/countryInfo.php',
             method: 'GET',
@@ -339,22 +353,20 @@ $(document).ready(function () {
             success: function(details){
               countryName = details['geonames'][0]['countryName'];
               capitalName = details['geonames'][0]['capital'];
+              // console.log(`The countryName : ${countryName}`)
               // let latAndLng = findLatAndLng(details['geonames'][0]['countryName'], details['geonames'][0]['capital']);
               // console.log(findLatAndLng(item['geonames'][0]['countryName'], item['geonames'][0]['capital']));
               // let arrayLength = Math.floor((findLatAndLng(item['geonames'][0]['countryName'], item['geonames'][0]['capital'])['results'])/2);
-              // console.log(arrayLength);
+
               $('#result').html(`
               <h3>Country: ${details['geonames'][0]['countryName']}</h3>
               <h3>Capital: ${details['geonames'][0]['capital']}</h3>
               <h3>Population: ${details['geonames'][0]['population']}</h3>
               `)
+              findLatAndLng(countryName,capitalName);
               // wiki(latAndLng['results'][0]['geometry']['lat'], latAndLng[0]['results']['geometry']['lng']);
             }
           }
-          
-
-          
-          
           )
 
           L.geoJSON(knn).bindPopup(countryValue).addTo(map);
@@ -362,9 +374,14 @@ $(document).ready(function () {
 
           if(knn['type'] == 'MultiPolygon'){
             knnLength = Math.floor((knn['coordinates'][0][0].length)/2);
+
+
+
             map.setView([knn['coordinates'][0][0][knnLength][1],knn['coordinates'][0][0][knnLength][0]],7);
           }else{
             knnLength = Math.floor((knn['coordinates'][0].length)/2);
+
+
             map.setView([knn['coordinates'][0][knnLength][1],knn['coordinates'][0][knnLength][0]],5);
           };
         }
