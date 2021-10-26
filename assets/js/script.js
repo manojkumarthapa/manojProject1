@@ -1,5 +1,3 @@
-let countryJSON = "assets/js/countryBorders.geo.json";
-let countryLocation = 'assets/js/countryInfo.json';
 
 
 
@@ -41,13 +39,7 @@ let countryInfoArray = [];
 
 
 // CountryInfo
-$.getJSON(countryLocation, function (item) {
-  $(item).each(function (x, y) {
-    countryInfoArray.push(y);
-  })
-})
 
-console.log(countryInfoArray);
 
 
 // Weather API
@@ -225,14 +217,6 @@ function clearResult() {
 };
 
 
-// Country in index
-let countryIndex = [];
-
-$.getJSON(countryJSON, function (country) {
-  for (let x = 0; x < country['features'].length; x++) {
-    countryIndex.push(country['features'][x]['properties']['name']);
-  }
-})
 
 
 
@@ -278,22 +262,110 @@ setTimeout(function () {
 }, 500);
 
 $(document).ready(function () {
+  let countryIndex = [];
+  $.ajax({
+    url: 'assets/php/countrySortName.php',
+    success: function(item){
+      let data = JSON.parse(item);
+      $(data).each(function(numb, item){
+        countryIndex.push(item['properties']['name']);
+        $('#country').append(
+          '<option class = "country" value = ' + '"' +
+          item['properties']['name'] + '"' +
+          '>' +
+          item['properties']['name'] +
+          '</option>'
+        )
+        $("nav").append("</select>");
+      })
+    }
+  })
+  console.log(countryIndex)
+  $('#country').click(function(){
+    $('#result').html("");
+    let countryValue = $('#country').val();
+    let iso3 = "";
+    
+    $.ajax({
+      url: 'assets/php/countryDetails.php',
+      success: function(item){
+        let data = JSON.parse(item);
+        for(let i =0; i< data.length; i++){
+          
+          if (countryIndex[i].startsWith(countryValue)) {
+            countryValue = countryIndex[i];
+            let index = countryIndex.indexOf(countryValue);
+            console.log(index);
+            let knn = data[index]['geometry'];
+            let iso2 = data[index]['properties']['iso_a2'];
 
-  $.getJSON(countryJSON, function (countries) {
-    $(countries["features"]).each(function (numb, data) {
-      // Cant add img beside option
-      // numb = '<img src="https://www.countryflags.io/'+ data['properties']['iso_a2']+'/shiny/16.png">'
-      // console.log(numb);
-      $("#country").append(
-        '<option class = "country" value=' + '"'+
-        data["properties"]["name"] + '"'+
-        '>' +
-        data["properties"]["name"] +
-        "</option>"
-      );
-    });
-  });
-  $("nav").append("</select>");
+            $.ajax({
+            url: 'assets/php/countryInfo.php',
+            method: 'GET',
+            data: {
+              'iso2': iso2
+            },
+            success: function(details){
+              countryName = details['geonames'][0]['countryName'];
+              capitalName = details['geonames'][0]['capital'];
+              
+              let currencyValue = "";
+              $.ajax({
+                url: 'assets/php/iso3.php',
+                data: {
+                  'city' : capitalName,
+                  'country': countryName
+                },
+                success: function(item){
+                  iso3 = item['results'][0]['annotations']['currency']['iso_code'];
+                  console.log(iso3);
+                }
+              });
+              $.ajax({
+                url: 'assets/php/currencyRates.php',
+                success: function(item){
+                  let rates = item["rates"];
+                  let currencyValue = rates[iso3];
+                  console.log(currencyValue)
+                  $('#result').html(`
+              <h3>Country: ${details['geonames'][0]['countryName']}</h3>
+              <h3>Capital: ${details['geonames'][0]['capital']}</h3>
+              <h3>Population: ${details['geonames'][0]['population']}</h3>
+              <h3>1USD to ${countryName} : ${currencyValue}</h3>
+              `)
+                }
+              })
+              console.log(currencyValue)
+              
+              findLatAndLng(countryName,capitalName);
+              L.geoJSON(knn).bindPopup(countryValue).addTo(map);
+              if(knn['type'] == 'MultiPolygon'){
+                knnLength = Math.floor((knn['coordinates'][0][0].length)/2);
+                map.setView([knn['coordinates'][0][0][knnLength][1],knn['coordinates'][0][0][knnLength][0]],7);
+                markers.addLayer(L.marker([knn['coordinates'][0][0][0][1],knn['coordinates'][0][0][0][0]]));
+
+                map.addLayer(markers);
+
+              }else if(knn['type'] == 'Polygon'){
+                knnLength = Math.floor((knn['coordinates'][0].length)/2);
+                map.setView([knn['coordinates'][0][knnLength][1],knn['coordinates'][0][knnLength][0]],5);
+                markers.addLayer(L.marker([knn['coordinates'][0][0][1],knn['coordinates'][0][0][0]]));
+                map.addLayer(markers);
+              };
+            }
+          }
+          )
+          }
+
+          
+          
+
+
+        }
+      }
+    })
+  })
+   
 
   $('#viewLatlng').click(function () {
     let lat = $('#lat').val();
@@ -331,62 +403,5 @@ $(document).ready(function () {
     updateRateFrom(countryBase, countryExchanged, currencySendAmt);
   });
 
-  // nav select tag
-  $('#country').click(function () {
-    let countryValue = $('#country').val();
-    $.getJSON(countryJSON, function (country) {
-      console.log(`The countryValue ${countryValue}`)
-      for (let x = 0; x < countryIndex.length; x++) {
-        if (countryIndex[x].startsWith(countryValue)) {
-          countryValue = countryIndex[x];
-          let index = countryIndex.indexOf(countryValue);
-          let jpt = country['features'][index];
-          let knn = country['features'][index]['geometry'];
-          let iso2 = country['features'][index]['properties']['iso_a2'];
 
-          $.ajax({
-            url: 'assets/php/countryInfo.php',
-            method: 'GET',
-            data: {
-              'iso2': iso2
-            },
-            success: function(details){
-              countryName = details['geonames'][0]['countryName'];
-              capitalName = details['geonames'][0]['capital'];
-              // console.log(`The countryName : ${countryName}`)
-              // let latAndLng = findLatAndLng(details['geonames'][0]['countryName'], details['geonames'][0]['capital']);
-              // console.log(findLatAndLng(item['geonames'][0]['countryName'], item['geonames'][0]['capital']));
-              // let arrayLength = Math.floor((findLatAndLng(item['geonames'][0]['countryName'], item['geonames'][0]['capital'])['results'])/2);
-
-              $('#result').html(`
-              <h3>Country: ${details['geonames'][0]['countryName']}</h3>
-              <h3>Capital: ${details['geonames'][0]['capital']}</h3>
-              <h3>Population: ${details['geonames'][0]['population']}</h3>
-              `)
-              findLatAndLng(countryName,capitalName);
-              // wiki(latAndLng['results'][0]['geometry']['lat'], latAndLng[0]['results']['geometry']['lng']);
-            }
-          }
-          )
-
-          L.geoJSON(knn).bindPopup(countryValue).addTo(map);
-
-
-          if(knn['type'] == 'MultiPolygon'){
-            knnLength = Math.floor((knn['coordinates'][0][0].length)/2);
-
-
-
-            map.setView([knn['coordinates'][0][0][knnLength][1],knn['coordinates'][0][0][knnLength][0]],7);
-          }else{
-            knnLength = Math.floor((knn['coordinates'][0].length)/2);
-
-
-            map.setView([knn['coordinates'][0][knnLength][1],knn['coordinates'][0][knnLength][0]],5);
-          };
-        }
-
-      }
-    })
-  });
 });
