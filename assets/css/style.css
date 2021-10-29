@@ -4,12 +4,54 @@
   box-sizing: border-box;
 }
 
+main > nav {
+  position: absolute;
+  top: 2vh;
+  right: 2vw;
+  min-height: 10vh;
+  z-index: 1;
+}
+main > nav > label {
+  position: relative;
+  left: 8vw;
+}
+
+main > nav > select {
+  min-width: 25vw;
+  text-align: center;
+  min-height: 2em;
+  margin-top: 1vh;
+}
+
+main > nav > select {
+  opacity: 0.7;
+  border-radius: 2em;
+}
+
+main > nav > select > option {
+  background-color: rgb(70, 112, 248);
+  line-height: 2em;
+}
+
+main > nav > select > option:nth-child(even) {
+  background-color: yellow;
+}
+
+main > nav > select > option:hover {
+  background-color: rgb(112, 221, 197);
+}
+
+.country {
+  height: 2em;
+}
+
 #myMap {
   position: absolute;
   bottom: 0;
   right: 0;
   left: 0;
-  top: 100px;
+  top: 10vh;
+
   object-fit: cover;
   object-position: top;
   z-index: 0;

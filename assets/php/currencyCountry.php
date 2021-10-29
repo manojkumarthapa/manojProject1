@@ -1,6 +1,6 @@
 <?php
 
-$api = 'd025bfa7386c489c9a801f00ed7dff01';
+$api = '02f7f0e573d74644b585267ea6055d12';
 $url = 'https://openexchangerates.org/api/currencies.json?app_id='.$api.'&base='.$_GET['base'];
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);

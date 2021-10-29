@@ -24,11 +24,11 @@
   <body>
     <main>
       <nav>
-        <label for="country">Choose a country: </label>
+        <label for="country">Choose a country</label><br>
         <select
           name="country"
           id="country"
-          onmousedown="if(this.options.length > 5){this.size = 5}"
+          onmousedown="if(this.options.length > 10){this.size = 10}"
           onchange="this.size=0"
         ></select>
       </nav>

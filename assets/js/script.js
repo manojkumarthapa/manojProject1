@@ -8,8 +8,39 @@ var markers = L.markerClusterGroup();
 
 
 
+// maker icons in arrays
+  let iconNames =[];
+  $.ajax({
+  url: 'assets/php/iconNames.php',
+  success: function(data){
+    let jyaw = data.split(",")
+    jyaw.shift()
+    jyaw.shift()
+    for(let i = 0; i< jyaw.length; i++){
+      jyaw[i] = jyaw[i].slice(1)
+      jyaw[i] = jyaw[i].slice(0,-1)
+    }
+    jyaw[14] = jyaw[14].slice(0,-1)
+    jyaw.forEach(function(item, numb){
+      iconNames.push(item)
+    })
+    } 
+  })
+
+  
+let currentMarker = L.icon({
+  iconUrl: "assets/img/star-3.png",
+  iconSize: [32,37],
+  iconAnchor: [16,37],
+  popupAnchor: [0, -30]
+})
+
+
+
+
 let map = L.map("myMap").setView([0, 0], 2);
 // map.addLayer(markers);
+
 
 
 L.tileLayer(
@@ -19,6 +50,12 @@ L.tileLayer(
       '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
   }
 ).addTo(map);
+
+
+
+
+
+
 
 // Add mouse Position
 L.control.mousePosition().addTo(map);
@@ -141,7 +178,7 @@ function updateRateFrom(currencyFrom, currencyTo, newCurrencyFrom) {
       let rate = `${currencyFrom}_${currencyTo}`;
       let receiving = item[rate] * newCurrencyFrom;
       $('#currencyValue').text(receiving);
-      console.log(receiving);
+
     }
   })
 }
@@ -156,7 +193,6 @@ function wiki(lat, lng){
       'lng': lng
     },
     success: function(item){
-      console.log(item);
       for(let x = 0; x< item['geonames'].length; x++){
         $('#result').append(`
         <details>
@@ -176,7 +212,7 @@ function wiki(lat, lng){
 function findLatAndLng(city, country){
   if(city.search(' ')){
     let city1 = city.replace(' ', '%20');
-    console.log(city1);
+
     city = city1;
   }
   if(country.search(' ')){
@@ -191,14 +227,10 @@ function findLatAndLng(city, country){
       'country' : country
     },
     success: function(item){
-    //  let theResult =  wiki(item['results'][0]['geometry']['lat'],item['results'][0]['geometry']['lng'])
-    //   console.log(theResult);
-    // console.log(`Lat: ${item['results'][0]['geometry']['lat']}`)
-    // console.log(`Lng: ${item['results'][0]['geometry']['lng']}`)
+
 
     let theLat = item['results'][0]['geometry']['lat'];
     let theLng = item['results'][0]['geometry']['lng']
-    console.log(item);
     weather(theLat, theLng);
     getTime(theLat, theLng);
     wiki(theLat, theLng);
@@ -208,20 +240,10 @@ function findLatAndLng(city, country){
 }
 
 
-
-
-
 // Clear Result section
 function clearResult() {
   $('#result').html("");
 };
-
-
-
-
-
-
-
 
 
 
@@ -230,7 +252,7 @@ navigator.geolocation.getCurrentPosition((result, options) => {
   weather(result["coords"]["latitude"], result["coords"]["longitude"]);
   getTime(result["coords"]["latitude"], result["coords"]["longitude"]);
   getCurrencyRates();
-  markers.addLayer(L.marker([result["coords"]["latitude"], result["coords"]["longitude"]]));
+  markers.addLayer(L.marker([result["coords"]["latitude"], result["coords"]["longitude"]],{icon: currentMarker}));
   map.addLayer(markers);
 });
 
@@ -263,41 +285,99 @@ setTimeout(function () {
 
 $(document).ready(function () {
   let countryIndex = [];
+  let iso2;
+  iconNames.splice(11,1);
+
   $.ajax({
     url: 'assets/php/countrySortName.php',
     success: function(item){
+
       let data = JSON.parse(item);
-      $(data).each(function(numb, item){
-        countryIndex.push(item['properties']['name']);
+      $(data).each(function(numb, item1){
+        
+        countryIndex.push(item1);
         $('#country').append(
           '<option class = "country" value = ' + '"' +
-          item['properties']['name'] + '"' +
+          item1[0] + '"' +
           '>' +
-          item['properties']['name'] +
+          item1[0] +
           '</option>'
         )
         $("nav").append("</select>");
       })
+
     }
   })
-  console.log(countryIndex)
   $('#country').click(function(){
     $('#result').html("");
+
+
     let countryValue = $('#country').val();
-    let iso3 = "";
-    
+    let currentIndex;
+    let knn;
+    let iso3;
+    let knnType;
+    // let geometry;
+    let currentLatLng;
+    for (let i =0; i <countryIndex.length;i++){
+      if(countryIndex[i][0] == countryValue){
+        currentIndex = i;
+      }
+    }
+
     $.ajax({
       url: 'assets/php/countryDetails.php',
       success: function(item){
         let data = JSON.parse(item);
-        for(let i =0; i< data.length; i++){
-          
-          if (countryIndex[i].startsWith(countryValue)) {
-            countryValue = countryIndex[i];
-            let index = countryIndex.indexOf(countryValue);
-            console.log(index);
-            let knn = data[index]['geometry'];
-            let iso2 = data[index]['properties']['iso_a2'];
+        currentLatLng = data[currentIndex];
+        $.ajax({
+              url: 'assets/php/fullGeometry.php',
+              success: function(details){
+                let data1 = JSON.parse(details);
+                let geometry = data1[currentIndex]['geometry'];
+                let knnType = data1[currentIndex]['geometry']['type'];
+                L.geoJSON(geometry).bindPopup(countryValue).addTo(map);
+                if(knnType == 'MultiPolygon'){
+                  let knnFullLength = geometry['coordinates'][0][0].length;
+                let knnLength = Math.floor((geometry['coordinates'][0][0].length)/2);
+                map.setView([geometry['coordinates'][0][0][knnLength][1],geometry['coordinates'][0][0][knnLength][0]],7);
+                for(let i = 0; i< knnFullLength; i++){
+                  let randomNumber = Math.floor(Math.random() * 14);
+                  let randomMarker = L.icon({
+                  iconUrl: "assets/img/"+iconNames[randomNumber],
+                  iconSize: [32,37],
+                  iconAnchor: [16,37],
+                  popupAnchor: [0, -30]
+                  })
+                  markers.addLayer(L.marker([geometry['coordinates'][0][0][i][1],geometry['coordinates'][0][0][i][0]], {icon: randomMarker}));
+                }
+
+                map.addLayer(markers);
+
+              }else if(knnType == 'Polygon'){
+                let knnFullLength = geometry['coordinates'][0].length;
+                let knnLength = Math.floor((geometry['coordinates'].length)/2);
+                map.setView([geometry['coordinates'][0][knnLength][1],geometry['coordinates'][0][knnLength][0]],5);
+
+                for(let i = 0; i< knnFullLength; i++){
+                  let randomNumber = Math.floor(Math.random() * 14);
+                  let randomMarker = L.icon({
+                  iconUrl: "assets/img/"+iconNames[randomNumber],
+                  iconSize: [32,37],
+                  iconAnchor: [16,37],
+                  popupAnchor: [0, -30]
+                  })
+                  markers.addLayer(L.marker([geometry['coordinates'][0][i][1],geometry['coordinates'][0][i][0]], {icon: randomMarker}));
+                }
+
+                map.addLayer(markers);
+              };
+
+              }
+            })
+
+        iso2 = countryIndex[currentIndex][1];
+        countryValue = countryIndex[currentIndex][0];
 
             $.ajax({
             url: 'assets/php/countryInfo.php',
@@ -317,8 +397,16 @@ $(document).ready(function () {
                   'country': countryName
                 },
                 success: function(item){
-                  iso3 = item['results'][0]['annotations']['currency']['iso_code'];
-                  console.log(iso3);
+                  try{
+                    iso3 = item['results'][0]['annotations']['currency']['iso_code'];
+                  }
+                  catch(err){
+                  }
+                  try{
+                    iso3 = item['result'][0]['annotations']['currency']['iso_code'];
+                  }
+                  catch(err){
+                  }
                 }
               });
               $.ajax({
@@ -326,7 +414,6 @@ $(document).ready(function () {
                 success: function(item){
                   let rates = item["rates"];
                   let currencyValue = rates[iso3];
-                  console.log(currencyValue)
                   $('#result').html(`
               <h3>Country: ${details['geonames'][0]['countryName']}</h3>
               <h3>Capital: ${details['geonames'][0]['capital']}</h3>
@@ -335,35 +422,14 @@ $(document).ready(function () {
               `)
                 }
               })
-              console.log(currencyValue)
-              
               findLatAndLng(countryName,capitalName);
-              L.geoJSON(knn).bindPopup(countryValue).addTo(map);
-              if(knn['type'] == 'MultiPolygon'){
-                knnLength = Math.floor((knn['coordinates'][0][0].length)/2);
-                map.setView([knn['coordinates'][0][0][knnLength][1],knn['coordinates'][0][0][knnLength][0]],7);
-                markers.addLayer(L.marker([knn['coordinates'][0][0][0][1],knn['coordinates'][0][0][0][0]]));
-
-                map.addLayer(markers);
-
-              }else if(knn['type'] == 'Polygon'){
-                knnLength = Math.floor((knn['coordinates'][0].length)/2);
-                map.setView([knn['coordinates'][0][knnLength][1],knn['coordinates'][0][knnLength][0]],5);
-                markers.addLayer(L.marker([knn['coordinates'][0][0][1],knn['coordinates'][0][0][0]]));
-                map.addLayer(markers);
-              };
             }
           }
           )
           }
 
-          
-          
-
-
-        }
       }
-    })
+    )
   })
    
 
