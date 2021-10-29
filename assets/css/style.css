@@ -60,12 +60,6 @@ main > nav > select > option:hover {
   transition-duration: 2s;
 }
 
-#sidebar {
-  background-color: cornsilk;
-  opacity: 0.8;
-  max-width: 50vw;
-  text-align: center;
-}
 #sidebar:nth-child(n) {
   font-size: 0.8em;
 }

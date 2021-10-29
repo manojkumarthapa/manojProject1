@@ -269,19 +269,19 @@ L.easyButton('fa-globe', function () {
   })
 }).addTo(map);
 
+let controlThis;
 // Toggles sidebar
 L.easyButton('fa-sliders-h', function () {
   sidebar.toggle();
+  this = 
 }).addTo(map);
 // Adds sidebar
 
-var sidebar = L.control.sidebar('sidebar', {
-  position: 'left'
-});
+var sidebar = L.control.sidebar('staticBackdrop');
 map.addControl(sidebar);
-setTimeout(function () {
-  sidebar.show();
-}, 500);
+// setTimeout(function () {
+//   sidebar.show();
+// }, 500);
 
 $(document).ready(function () {
   let countryIndex = [];
