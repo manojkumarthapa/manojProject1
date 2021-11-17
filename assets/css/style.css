@@ -7,51 +7,97 @@
   box-sizing: border-box;
 }
 
-main > nav {
-  position: absolute;
-  right: 2vw;
-  height: 100vh;
+#preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  overflow: hidden;
+  background: #fff;
 }
-main > nav > label {
+
+#preloader:before {
+  content: "";
+  position: fixed;
+  top: calc(50% - 30px);
+  left: calc(50% - 30px);
+  border: 6px solid #f2f2f2;
+  border-top: 6px solid #56829e;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  -webkit-animation: animate-preloader 1s linear infinite;
+  animation: animate-preloader 1s linear infinite;
+}
+
+@-webkit-keyframes animate-preloader {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes animate-preloader {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+main > #myMap > #countyDropdown {
+  position: relative;
+  left: 50vw;
+  transform: translateX(calc(-10vw));
+  z-index: 3000;
+}
+main > #myMap > #countyDropdown > label {
   position: relative;
   left: 8vw;
 }
 
-main > nav > select {
-  min-width: 25vw;
+main > #myMap > #countyDropdown > select {
+  min-width: 20vw;
   text-align: center;
-  min-height: 2em;
+  min-height: 3em;
   margin-top: 1vh;
 }
-
-main > nav > select {
+main > #myMap > #countyDropdown > select {
   opacity: 0.7;
   border-radius: 2em;
 }
-
-main > nav > select > option {
+main > #myMap > #countyDropdown > select > option {
+  font-size: 2em;
+}
+main > #myMap > #countyDropdown > select > option:nth-child(odd) {
   background-color: rgb(70, 112, 248);
-  line-height: 1.5em;
 }
 
-main > nav > select > option:nth-child(even) {
+main > #myMap > #countyDropdown > select > option:nth-child(even) {
   background-color: yellow;
 }
 
-main > nav > select > option:hover {
+/* main > #myMap > #countyDropdown > select > option:hover {
   background-color: rgb(112, 221, 197);
-}
-
-.country {
-  height: 2em;
-}
+} */
 
 #myMap {
   position: absolute;
   bottom: 0;
   right: 0;
   left: 0;
-  top: 18vh;
+  top: 0;
+}
+.leaflet-control-bootstrapmodal {
+  margin-top: 5vh !important;
 }
 
 .modal-header > #exampleModalLabel {
@@ -61,6 +107,7 @@ main > nav > select > option:hover {
 }
 #exampleModal {
   text-align: center;
+  z-index: 5000;
 }
 
 #viewLatlng {
@@ -88,7 +135,7 @@ main > nav > select > option:hover {
 .col-auto {
   display: flex;
   justify-content: center;
-  margin-bottom: 3vh;
+  /* margin-bottom: 3vh; */
 }
 
 #strippedTable {
@@ -122,6 +169,10 @@ td {
 #strippedTable td {
   font-size: 1.2em;
   font-weight: bold;
+}
+
+#holidays > ul > li {
+  list-style-type: none;
 }
 
 #wikiVal p {

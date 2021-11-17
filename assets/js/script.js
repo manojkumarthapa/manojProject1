@@ -20,14 +20,18 @@ var markers = L.markerClusterGroup();
     } 
   })
 
-  
-let currentMarker = L.icon({
-  iconUrl: "assets/img/star-3.png",
-  iconSize: [32,37],
-  iconAnchor: [16,37],
-  popupAnchor: [0, -30]
-})
+  function randomImg(){
+    let randomNumber = Math.floor(Math.random() * 14);
+    let randomMarker = L.icon({
+    iconUrl: "assets/img/"+iconNames[randomNumber],
+    iconSize: [32,37],
+    iconAnchor: [16,37],
+    popupAnchor: [0, -30]
+  })
+  return randomMarker;
+}
 
+const year = new Date().getFullYear();
 
 
 
@@ -97,6 +101,7 @@ function getCurrencyRates() {
     url: 'assets/php/currencyRates.php',
     method: 'GET',
     success: function (item) {
+      console.log(item);
       let rates = item['rates'];
       let countryShortHand = Object.keys(rates);
       let fromSelected = '';
@@ -163,8 +168,8 @@ function wiki(lat, lng){
       'lng': lng
     },
     success: function(item){
-      
-      for(let x = 0; x< item['geonames'].length; x++){
+      try{
+        for(let x = 0; x< item['geonames'].length; x++){
         $('#wikiVal').append(`
         <details>
         <summary>${item['geonames'][x]['title']}</summary>
@@ -173,6 +178,11 @@ function wiki(lat, lng){
         </details>         
         `)
       }
+      }
+      catch(err){
+        console.log('try again.')
+      }
+
     }
   })
 }
@@ -205,7 +215,7 @@ function findLatAndLng(city, country){
     success: function(item){
     let theLat = item['results'][0]['geometry']['lat'];
     let theLng = item['results'][0]['geometry']['lng']
-    map.setView([theLat,theLng],6)
+    // map.setView([theLat,theLng],6)
     weather(theLat, theLng);
     getTime(theLat, theLng);
     wiki(theLat, theLng);
@@ -220,8 +230,6 @@ navigator.geolocation.getCurrentPosition((result, options) => {
   weather(result["coords"]["latitude"], result["coords"]["longitude"]);
   getTime(result["coords"]["latitude"], result["coords"]["longitude"]);
   getCurrencyRates();
-  markers.addLayer(L.marker([result["coords"]["latitude"], result["coords"]["longitude"]],{icon: currentMarker}));
-  map.addLayer(markers);
 });
 
 
@@ -240,9 +248,34 @@ L.easyButton('fa-globe', function () {
 new L.Control.BootstrapModal({
     modalId: 'exampleModal',
 }).addTo(map);
-$('.leaflet-control-bootstrapmodal > a').append(`
+$('.leaflet-control-bootstrapmodal > a').html(`
 <i class="fas fa-sliders-h"></i>
+
 `)
+
+
+
+new L.Control.BootstrapModal({
+    modalId: 'exampleModalNews'
+}).addTo(map);
+
+// Find out how to remove the middle fontawesome as there are 3 of them when oni 2 bootstrapmodal is available.
+$('#exampleModalNews  > a').append(`
+<i class="far fa-newspaper"></i>
+`)
+
+
+
+
+$(window).on('load', function () {
+  if ($('#preloader').length) {
+    $('#preloader').delay(1000).fadeOut('slow',function () {
+      $(this).remove();
+    });
+  }
+});
+
+
 
 $(document).ready(function () {
   let countryIndex = [];
@@ -251,31 +284,27 @@ $(document).ready(function () {
   $.ajax({
     url: 'assets/php/countrySortName.php',
     success: function(item){
-      let data = JSON.parse(item);
-      $(data).each(function(numb, item1){
-        countryIndex.push(item1);
+      $(item['data']).each(function(numb, data){
+        countryIndex.push(data);
         $('#country').append(
           '<option class = "country" value = ' + '"' +
-          item1[0] + '"' +
+          data[1] + '"' +
           '>' +
-          item1[0] +
+          data[0] +
           '</option>'
         )
-        $("nav").append("</select>");
+        $("#countyDropdown").append("</select>");
       })
 
     }
   })
-
-  console.log(countryIndex)
-  $('#country').click(function(){
-    // $('#result').html("");
+  $('#country').change(function(){
+    
     let countryValue = $('#country').val();
     $('#exampleModalLabel').text(countryValue)
-    console.log(`which clicked? ${countryValue}`)
     let currentIndex;
     // let geometry;
-    let currentLatLng;
+
     for (let i =0; i <countryIndex.length;i++){
       if(countryIndex[i][0] == countryValue){
         currentIndex = i;
@@ -284,69 +313,58 @@ $(document).ready(function () {
 
     $.ajax({
       url: 'assets/php/countryDetails.php',
+      method: 'GET',
+      data: {
+        'iso2': countryValue
+      },
       success: function(item){
-        let data = JSON.parse(item);
-        currentLatLng = data[currentIndex];
-        $.ajax({
-              url: 'assets/php/fullGeometry.php',
-              success: function(details){
-                let data1 = JSON.parse(details);
-                let geometry = data1[currentIndex]['geometry'];
-                let knnType = data1[currentIndex]['geometry']['type'];
-                L.geoJSON(geometry).bindPopup(countryValue).addTo(map);
-                
-                if(knnType == 'MultiPolygon'){
-                  for(let i = 0; i < geometry['coordinates'].length;i++){
-                    for(let x =0; x< geometry['coordinates'][i].length; x++){
-                      for(let y = 0; y < geometry['coordinates'][i][x].length;y++){
-                      let randomNumber = Math.floor(Math.random() * 14);
-                      let randomMarker = L.icon({
-                      iconUrl: "assets/img/"+iconNames[randomNumber],
-                      iconSize: [32,37],
-                      iconAnchor: [16,37],
-                      popupAnchor: [0, -30]
-                      })
-                      markers.addLayer(L.marker([geometry['coordinates'][i][x][y][1],geometry['coordinates'][i][x][y][0]], {icon: randomMarker}));
-                    }
-                    }
-                  }
-                map.addLayer(markers);
-              }else if(knnType == 'Polygon'){
-                    for(let i = 0; i < geometry['coordinates'].length;i++){
-                    for(let x = 0; x < geometry['coordinates'][i].length;x++){
-                      let randomNumber = Math.floor(Math.random() * 14);
-                      let randomMarker = L.icon({
-                      iconUrl: "assets/img/"+iconNames[randomNumber],
-                      iconSize: [32,37],
-                      iconAnchor: [16,37],
-                      popupAnchor: [0, -30]
-                      })
-                      markers.addLayer(L.marker([geometry['coordinates'][i][x][1],geometry['coordinates'][i][x][0]], {icon: randomMarker}));
-                    }
-                  }
-                map.addLayer(markers);
-              };
-              }
+        let itemCoordinates = item['data']['coordinates'];
+        console.log(itemCoordinates);
+        let border = L.geoJSON(item['data'],{
+          style: function(){
+            return{
+              color: '#060',
+              weight: 3.5
+            }
+          }
+        }).addTo(map)
+        let randomNumber = Math.floor(Math.random() * 14);
+        let randomMarker = L.icon({
+        iconUrl: "assets/img/"+iconNames[randomNumber],
+        iconSize: [32,37],
+        iconAnchor: [16,37],
+        popupAnchor: [0, -30]
+        })
+        if(item['data']['type']=="Polygon"){
+          console.log(item['data']['type'])
+          itemCoordinates.forEach(function(coordsArray){
+            coordsArray.forEach(function(coords){
+              markers.addLayer(L.marker([coords[1],coords[0]], {icon: randomImg()}));
             })
-
-        iso2 = countryIndex[currentIndex][1];
-        countryValue = countryIndex[currentIndex][0];
-        let currencyCode;
-
+          })
+          map.addLayer(markers);
+        }else{
+          console.log(item['data']['type'])
+          itemCoordinates.forEach(function(outerIndex){
+            outerIndex.forEach(function(coordsArray){
+              coordsArray.forEach(function(coords){
+                markers.addLayer(L.marker([coords[1],coords[0]], {icon: randomImg()}));
+              })
+            })
+          })
+          map.addLayer(markers);
+        }
+        map.fitBounds(border.getBounds());
             $.ajax({
             url: 'assets/php/countryInfo.php',
             method: 'GET',
             data: {
-              'iso2': iso2
+              'iso2': countryValue
             },
             success: function(details){
               countryName = details['geonames'][0]['countryName'];
               capitalName = details['geonames'][0]['capital'];
               currencyCode = details['geonames'][0]['currencyCode'];
-              console.log(`currency Code: ${currencyCode}`)
-              console.log(countryName)
-              console.log(`capital ${capitalName}`)
-              console.log(`iso2 ${iso2}`)
               $('#currencyCountryExchanged').val(currencyCode)
 
               $.ajax({
@@ -386,6 +404,28 @@ $(document).ready(function () {
               })
                 }
               });
+              $.ajax({
+                url: 'assets/php/nationalHoliday.php',
+                data: {
+                  'iso2' : countryValue,
+                  'year' : year
+                },
+                success: function(item){
+                  $('#holidays > ul').html(``);
+                  try{
+                    item.forEach(function(holiday){
+                    $('#holidays > ul').append(`
+                    <li>${holiday.date} : ${holiday.name}</li>
+                    `)
+                  })
+                  }
+                  catch(err){
+                    $('#holidays > ul').append(`
+                    <p>${countryValue} is not available in API</p>
+                    `);
+                  }
+                }
+              })
             }
           }
           )
@@ -396,13 +436,13 @@ $(document).ready(function () {
   })
    
 
-  $('#currencyCountryBase').click(function () {
+  $('#currencyCountryBase').change(function () {
     let countryBase = $('#currencyCountryBase').val();
     let countryExchanged = $('#currencyCountryExchanged').val();
     let currencySendAmt = $('#currencySendAmt').val();
     updateRateFrom(countryBase, countryExchanged, currencySendAmt);
   });
-
+  
   $('#currencySendAmt').change(function () {
     let countryBase = $('#currencyCountryBase').val();
     let countryExchanged = $('#currencyCountryExchanged').val();
@@ -411,7 +451,7 @@ $(document).ready(function () {
   })
 
 
-  $('#currencyCountryExchanged').click(function () {
+  $('#currencyCountryExchanged').change(function () {
     let countryBase = $('#currencyCountryBase').val();
     let countryExchanged = $('#currencyCountryExchanged').val();
     let currencySendAmt = $('#currencySendAmt').val();

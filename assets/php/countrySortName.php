@@ -1,27 +1,36 @@
 <?php
-$string = file_get_contents('../js/countryBorders.geo.json');
-$jizz1 = json_decode($string,true)['features'];
+
+$executionStartTime = microtime(true);
+$countryDetails = file_get_contents('../js/countryBorders.geo.json');
+$countryFeatures = json_decode($countryDetails,true)['features'];
 
 
-
-
-function knn($a, $b){
+function sortAlphabetical($a, $b){
     return $a['properties']['name'] <=> $b['properties']['name'];
 }
-usort($jizz1, "knn");
+usort($countryFeatures, "sortAlphabetical");
 // Returns countryBorders.geo.json in alphabetical order
+
+
 $nameAndIso = [] ;
 $container = [];
-// Return name and iso to request
-for($i = 0; $i < count($jizz1); $i++) {
-    $container = [];
-    array_push($container, $jizz1[$i]['properties']['name']);
-    array_push($container, $jizz1[$i]['properties']['iso_a2']);
-    array_push($nameAndIso, $container);
-};
-$output['data'] = $nameAndIso;
-// print_r($nameAndIso);
-echo json_encode($nameAndIso);
 
+foreach ($countryFeatures as $feature) {
+    $tempContainer= [];
+    array_push($tempContainer, $feature['properties']['name']);
+    array_push($tempContainer, $feature['properties']['iso_a2']);
+    array_push($nameAndIso, $tempContainer);
+        
+};
+
+
+$output['status']['code'] = "200";
+$output['status']['name'] = "ok";
+$output['status']['description'] = "success";
+$output['status']['executedIn'] = intval((microtime(true) - $executionStartTime) * 1000) . " ms";
+$output['data'] = $nameAndIso;
+
+header('Content-Type: application/json; charset=UTF-8');
+echo json_encode($output);
 
 ?>
