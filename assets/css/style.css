@@ -96,11 +96,33 @@ main > #myMap > #countyDropdown > select > option:nth-child(even) {
   left: 0;
   top: 0;
 }
-.leaflet-control-bootstrapmodal {
-  margin-top: 5vh !important;
+
+/* Buttons right side */
+
+.leaflet-right {
+  margin-top: 3vh;
+}
+.leaflet-right > .leaflet-control-bootstrapmodal:first-child > a {
+  background-image: url("../icons/info.png");
 }
 
-.modal-header > #exampleModalLabel {
+.leaflet-right > .leaflet-control-bootstrapmodal:nth-child(2) > a {
+  background-image: url("../icons/news.png");
+}
+
+.leaflet-right > .leaflet-control-bootstrapmodal:nth-child(3) > a {
+  background-image: url("../icons/covid.png");
+}
+
+.leaflet-right > .leaflet-control-bootstrapmodal:nth-child(4) > a {
+  background-image: url("../icons/weather.png");
+  background-size: contain;
+}
+.leaflet-right > .leaflet-control-bootstrapmodal > a {
+  background-size: contain;
+}
+
+.svg .modal-header > #exampleModalLabel {
   width: 100%;
   text-align: center;
   font-weight: bold;
@@ -135,7 +157,6 @@ main > #myMap > #countyDropdown > select > option:nth-child(even) {
 .col-auto {
   display: flex;
   justify-content: center;
-  /* margin-bottom: 3vh; */
 }
 
 #strippedTable {
@@ -185,4 +206,97 @@ td {
 #result {
   height: 40vh;
   overflow-y: scroll;
+}
+
+/* Covid */
+.covid-header {
+  width: 100%;
+}
+#exampleModalLabelCovid {
+  min-width: 100%;
+  text-align: center;
+}
+#covidResults {
+  width: 100%;
+  text-align: center;
+  border: 1px solid greenyellow;
+}
+
+#covidResults th,
+tr,
+td {
+  border: none;
+  font-weight: bold;
+}
+
+#covidResults tr:nth-child(odd) {
+  background-color: rgb(22, 163, 22);
+}
+
+#covidResults tr:nth-child(even) {
+  background-color: rgb(221, 67, 67);
+}
+
+/* Weather */
+
+.weather {
+  background-image: url("../icons/weatherbackground.jpg");
+  min-height: 50vh;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.8;
+}
+
+.forecast-header {
+  border-bottom: none;
+}
+
+#exampleModalWeather {
+  position: relative;
+  bottom: 0;
+  right: 0;
+}
+
+.forecast {
+  display: grid;
+  min-width: 100%;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+#todayForecast {
+  max-width: 100%;
+  max-height: 250px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 3fr));
+  grid-template-rows: repeat(auto-fit, minmax(150px, 1fr));
+  text-align: center;
+}
+#todayForecast p {
+  font-weight: bold;
+}
+
+#otherDayForecast {
+  max-width: 100%;
+  max-height: 250px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-rows: repeat(auto-fit, minmax(120px, 1fr));
+  text-align: left;
+  overflow: visible;
+}
+#otherDayForecast > div {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  border: 3px solid rgb(112, 150, 9);
+  border-collapse: collapse;
+}
+#otherDayForecast div div {
+  padding: 5px 0;
+}
+
+#otherDayForecast div div:first-child {
+  display: grid;
+  grid-template-columns: 1fr;
 }

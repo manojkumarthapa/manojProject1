@@ -219,7 +219,51 @@ function findLatAndLng(city, country){
     weather(theLat, theLng);
     getTime(theLat, theLng);
     wiki(theLat, theLng);
-
+    
+    // Weatherforcast for 7 days api
+    $.ajax({
+      url: 'assets/php/forecast.php',
+      data:{
+        'lat' : theLat,
+        'lng' : theLng
+      },
+      success: function(item){
+        console.log(`Weather forecast :`)
+        console.log(item)
+        console.log(item.current.weather[0].icon)
+        $('#todayForecast').html(`
+        <div>
+          <img src="http://openweathermap.org/img/wn/${item.current.weather[0].icon}@2x.png" alt="WeatherIcon">
+        </div>
+        <div>
+          <p>${item.daily[0].temp.min} &#8451</p><br>
+          <p>${item.daily[0].temp.max} &#8451</p><br>
+        </div>
+        <div>
+          <h3>${item.daily[0].weather[0].description}</h3>
+          <h3>${item.current.temp} &#8451</h3>
+        </div>
+        `)
+        let threeDaysForcast = "";
+        for(let i =1; i<= 3; i++ ){
+          let itemDate = new Date((item.daily[i].dt) * 1000);
+          let itemDateDay =itemDate.toUTCString().slice(0,8).replace(",", " ");
+          threeDaysForcast += `
+          <div>
+            <div>
+              <p>${itemDateDay}</p>
+              <img src="http://openweathermap.org/img/wn/${item.daily[i].weather[0].icon}@2x.png" alt="WeatherIcon">
+            </div>
+            <div>
+              <p>${item.daily[i].temp.min} &#8451</p><br>
+              <p>${item.daily[i].temp.max} &#8451</p><br>
+            </div>
+          </div>  
+          `
+        }
+        $('#otherDayForecast').html(threeDaysForcast);
+      }
+    })
     }
   })
 }
@@ -245,24 +289,34 @@ L.easyButton('fa-globe', function () {
   })
 }).addTo(map);
 
+
+// Bootstrap Modal for easy button. Right side 
+
 new L.Control.BootstrapModal({
     modalId: 'exampleModal',
+    tooltip: "Basic Info"
 }).addTo(map);
-$('.leaflet-control-bootstrapmodal > a').html(`
-<i class="fas fa-sliders-h"></i>
-
-`)
 
 
 
 new L.Control.BootstrapModal({
-    modalId: 'exampleModalNews'
+    modalId: 'exampleModalNews',
+    tooltip: "News Headlines"
 }).addTo(map);
 
-// Find out how to remove the middle fontawesome as there are 3 of them when oni 2 bootstrapmodal is available.
-$('#exampleModalNews  > a').append(`
-<i class="far fa-newspaper"></i>
-`)
+
+
+
+new L.Control.BootstrapModal({
+    modalId: 'exampleModalCovid',
+    tooltip: "Covid Info"
+}).addTo(map);
+
+new L.Control.BootstrapModal({
+    modalId: 'exampleModalWeather',
+    tooltip: "Weather Forecast Info"
+}).addTo(map);
+
 
 
 
@@ -424,6 +478,19 @@ $(document).ready(function () {
                     <p>${countryValue} is not available in API</p>
                     `);
                   }
+                }
+              })
+              $.ajax({
+                url: 'assets/php/covid.php',
+                data:{
+                  'iso2': countryValue
+                },
+                success: function(item){
+                  $('#exampleModalLabelCovid').text(`${item.data.name} latest covid statistics`)   
+                  $('#covid-newCase').text(item.data.timeline[0].new_confirmed);    
+                  $('#covid-newDeath').text(item.data.timeline[0].new_deaths);  
+                  $('#covid-totalCase').text(item.data.latest_data.confirmed);   
+                  $('#covid-totalDeath').text(item.data.latest_data.deaths);      
                 }
               })
             }

@@ -99,24 +99,79 @@
         </div>
       </div>
       <!-- Modal for news api -->
-            <div class="modal fade" id="exampleModalNews" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-              aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabelNews"></h5>
-                  </div>
-                  <div class="modal-body news">
-                    <div id="result">
-                      <h2>News Headlines</h2>
+      <div class="modal fade" id="exampleModalNews" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabelNews"></h5>
+            </div>
+            <div class="modal-body news">
+              <div id="result">
+                <h2>News Headlines</h2>
 
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+      </div>
+      
+      <!-- Modal for Covid api -->
+      <div class="modal fade" id="exampleModalCovid" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+      
+          <div class="modal-content">
+            <div class="modal-header covid-header">
+              <h5 class="modal-title" id="exampleModalLabelCovid"></h5>
             </div>
+            <div class="modal-body covid">
+              <table id="covidResults">
+                <tr>
+                  <th><i class="fas fa-ambulance"></i></th>
+                  <th>New Cases</th>
+                  <td id="covid-newCase"></td>
+                </tr>
+                <tr>
+                  <th><i class="fas fa-skull-crossbones"></i></th>
+                  <th>New Deaths</th>
+                  <td id="covid-newDeath"></td>
+                </tr>
+                <tr>
+                  <th><i class="fas fa-ambulance"></i></th>
+                  <th>Total Cases</th>
+                  <td id="covid-totalCase"></td>
+                </tr>
+                <tr>
+                  <th><i class="fas fa-skull-crossbones"></i></th>
+                  <th>Total Deaths</th>
+                  <td id="covid-totalDeath"></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <!-- Modal for forecast api -->
+      <div class="modal fade" id="exampleModalWeather" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content weather">
+            <div class="modal-header forecast-header">
+              <h5 class="modal-title" id="exampleModalLabelCovid">Today</h5>
+            </div>
+            <div class="modal-body forecast">
+              <div id="todayForecast"></div>
+              <div id="otherDayForecast"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
     </div>
   </main>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"
