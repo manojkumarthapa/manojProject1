@@ -35,6 +35,7 @@ const year = new Date().getFullYear();
 
 
 
+
 let map = L.map("myMap").setView([0, 0], 2);
 
 L.tileLayer(
@@ -247,6 +248,7 @@ function findLatAndLng(city, country){
         let threeDaysForcast = "";
         for(let i =1; i<= 3; i++ ){
           let itemDate = new Date((item.daily[i].dt) * 1000);
+          console.log(itemDate)
           let itemDateDay =itemDate.toUTCString().slice(0,8).replace(",", " ");
           threeDaysForcast += `
           <div>
@@ -318,6 +320,12 @@ new L.Control.BootstrapModal({
 }).addTo(map);
 
 
+new L.Control.BootstrapModal({
+    modalId: 'exampleModalWebcam',
+    tooltip: "Webcam"
+}).addTo(map);
+
+
 
 
 
@@ -347,24 +355,25 @@ $(document).ready(function () {
           data[0] +
           '</option>'
         )
-        $("#countyDropdown").append("</select>");
       })
-
     }
   })
+
+
   $('#country').change(function(){
     
     let countryValue = $('#country').val();
     $('#exampleModalLabel').text(countryValue)
     let currentIndex;
     // let geometry;
-
     for (let i =0; i <countryIndex.length;i++){
       if(countryIndex[i][0] == countryValue){
         currentIndex = i;
       }
     }
-
+    let todayDate = new Date();
+    let dateOnly = `${todayDate.getFullYear()}-${todayDate.getMonth()+1}-${todayDate.getDate()}`
+    console.log(dateOnly)
     $.ajax({
       url: 'assets/php/countryDetails.php',
       method: 'GET',
@@ -491,6 +500,49 @@ $(document).ready(function () {
                   $('#covid-newDeath').text(item.data.timeline[0].new_deaths);  
                   $('#covid-totalCase').text(item.data.latest_data.confirmed);   
                   $('#covid-totalDeath').text(item.data.latest_data.deaths);      
+                }
+              })
+              $.ajax({
+                url: 'assets/php/webcam.php',
+                data: {"iso2" : countryValue},
+                success: function(item){
+                  let data = item.data.result.webcams;
+                  let webcam = "";
+                  $('#exampleModalLabelWebcam').text(`${data[0].location.country} Webcams`);
+                  try{
+                    for(let i = 0; i<= 3; i++){
+                    webcam += `
+                    <iframe width="200" height="240" src="${data[i].player.day.embed}"></iframe>
+                    `
+                  }
+                  }catch(err){
+                    console.log()
+                  }
+                  $('.webcam').html(webcam)
+                }
+              })
+              $.ajax({
+                url: 'assets/php/news.php',
+                data: {
+                  'iso2': countryValue,
+                  'date': dateOnly
+                },
+                success: function(item){
+                  console.log(item);
+                  let news = '';
+                  let data = item.data.data;
+                  data.forEach(function(headline){
+                    console.log(headline)
+                    news += `
+                    <div>
+                    <h3>${headline.title}</h3>
+                    <p>${headline.description}</p>
+                    <p>Published at: ${headline.published_at}</p>
+                    <a href="${headline.url}" target="_blank">Click for more info</a>
+                    </div>
+                    `
+                  })
+                  $('.news').html(news);
                 }
               })
             }
