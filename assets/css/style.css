@@ -157,6 +157,7 @@ main > #myMap > #countyDropdown > select > option:nth-child(even) {
 
 .modal-content {
   max-height: 90vh;
+  margin-top: 7vh;
 }
 .modal-body > h3 {
   margin-bottom: 3vh;

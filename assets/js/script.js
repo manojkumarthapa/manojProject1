@@ -271,12 +271,6 @@ function findLatAndLng(city, country){
 }
 
 
-// adds marker to current location of device
-navigator.geolocation.getCurrentPosition((result, options) => {
-  weather(result["coords"]["latitude"], result["coords"]["longitude"]);
-  getTime(result["coords"]["latitude"], result["coords"]["longitude"]);
-  getCurrencyRates();
-});
 
 
 
@@ -286,8 +280,20 @@ L.easyButton('fa-globe', function () {
   navigator.geolocation.getCurrentPosition((result, options) => {
     $('#lat').val(result['coords']['latitude']);
     $('#lng').val(result['coords']['longitude']);
-    map.setView([result['coords']['latitude'], result['coords']['longitude']], 16);
-
+    // map.setView([result['coords']['latitude'], result['coords']['longitude']], 16);
+    getCurrencyRates();
+    $.ajax({
+      url: 'assets/php/getIso2.php',
+      data: {
+        'lat': result['coords']['latitude'],
+        'lng': result['coords']['longitude']
+      },
+      success: function(item){
+        // console.log(`item : ${item.results}`)
+        let userIso2 = item.results[0].components['ISO_3166-1_alpha-2'];
+        $('#country').val(userIso2).change();
+      }
+    })
   })
 }).addTo(map);
 
@@ -363,7 +369,7 @@ $(document).ready(function () {
   $('#country').change(function(){
     
     let countryValue = $('#country').val();
-    $('#exampleModalLabel').text(countryValue)
+    // $('#exampleModalLabel').text(countryValue)
     let currentIndex;
     // let geometry;
     for (let i =0; i <countryIndex.length;i++){
