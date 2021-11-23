@@ -1,6 +1,6 @@
 <?php
     $executionStartTime = microtime(true);
-    $api = 'd025bfa7386c489c9a801f00ed7dff01';
+    $api = '8a87cd470a03403aadb1e5f3754e6b9b';
     $url = 'https://openexchangerates.org/api/latest.json?app_id='.$api;
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);

@@ -1,7 +1,7 @@
 <?php
 
     $executionStartTime = microtime(true);
-    $api = '02f7f0e573d74644b585267ea6055d12';
+    $api = '8a87cd470a03403aadb1e5f3754e6b9b';
     $url = 'https://openexchangerates.org/api/currencies.json?app_id='.$api.'&base='.$_GET['base'];
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);

@@ -38,13 +38,18 @@ const year = new Date().getFullYear();
 
 let map = L.map("myMap").setView([0, 0], 2);
 
-L.tileLayer(
+let myLayer = L.tileLayer(
   "https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=kUYUQh6yWmhM3i7akAec",
   {
     attribution:
       '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
   }
 ).addTo(map);
+
+
+function tiles(){
+  L.layerGroup().addLayer(myLayer);
+}
 
 
 // Add mouse Position
@@ -102,7 +107,6 @@ function getCurrencyRates() {
     url: 'assets/php/currencyRates.php',
     method: 'GET',
     success: function (item) {
-      console.log(item);
       let rates = item['rates'];
       let countryShortHand = Object.keys(rates);
       let fromSelected = '';
@@ -152,7 +156,6 @@ function updateRateFrom(currencyFrom, currencyTo, newCurrencyFrom) {
     success: function (item) {
       let rate = `${currencyFrom}_${currencyTo}`;
       let receiving = item[rate] * newCurrencyFrom;
-      console.log(receiving)
       $('#currencyValue').val(receiving);
     }
   })
@@ -216,7 +219,6 @@ function findLatAndLng(city, country){
     success: function(item){
     let theLat = item['results'][0]['geometry']['lat'];
     let theLng = item['results'][0]['geometry']['lng']
-    // map.setView([theLat,theLng],6)
     weather(theLat, theLng);
     getTime(theLat, theLng);
     wiki(theLat, theLng);
@@ -229,9 +231,6 @@ function findLatAndLng(city, country){
         'lng' : theLng
       },
       success: function(item){
-        console.log(`Weather forecast :`)
-        console.log(item)
-        console.log(item.current.weather[0].icon)
         $('#todayForecast').html(`
         <div>
           <img src="http://openweathermap.org/img/wn/${item.current.weather[0].icon}@2x.png" alt="WeatherIcon">
@@ -248,7 +247,6 @@ function findLatAndLng(city, country){
         let threeDaysForcast = "";
         for(let i =1; i<= 3; i++ ){
           let itemDate = new Date((item.daily[i].dt) * 1000);
-          console.log(itemDate)
           let itemDateDay =itemDate.toUTCString().slice(0,8).replace(",", " ");
           threeDaysForcast += `
           <div>
@@ -280,7 +278,6 @@ L.easyButton('fa-globe', function () {
   navigator.geolocation.getCurrentPosition((result, options) => {
     $('#lat').val(result['coords']['latitude']);
     $('#lng').val(result['coords']['longitude']);
-    // map.setView([result['coords']['latitude'], result['coords']['longitude']], 16);
     getCurrencyRates();
     $.ajax({
       url: 'assets/php/getIso2.php',
@@ -289,7 +286,6 @@ L.easyButton('fa-globe', function () {
         'lng': result['coords']['longitude']
       },
       success: function(item){
-        // console.log(`item : ${item.results}`)
         let userIso2 = item.results[0].components['ISO_3166-1_alpha-2'];
         $('#country').val(userIso2).change();
       }
@@ -344,7 +340,6 @@ $(window).on('load', function () {
 });
 
 
-
 $(document).ready(function () {
   let countryIndex = [];
   let iso2;
@@ -365,11 +360,22 @@ $(document).ready(function () {
     }
   })
 
+  let borderLines;
 
   $('#country').change(function(){
-    
     let countryValue = $('#country').val();
-    // $('#exampleModalLabel').text(countryValue)
+    getCurrencyRates();
+    markers.clearLayers();
+    for(i in map._layers) {
+      if(map._layers[i]._path != undefined) {
+          try {
+              map.removeLayer(map._layers[i]);
+          }
+          catch(e) {
+              console.log("problem with " + e + map._layers[i]);
+          }
+      }
+    }
     let currentIndex;
     // let geometry;
     for (let i =0; i <countryIndex.length;i++){
@@ -379,7 +385,6 @@ $(document).ready(function () {
     }
     let todayDate = new Date();
     let dateOnly = `${todayDate.getFullYear()}-${todayDate.getMonth()+1}-${todayDate.getDate()}`
-    console.log(dateOnly)
     $.ajax({
       url: 'assets/php/countryDetails.php',
       method: 'GET',
@@ -388,7 +393,6 @@ $(document).ready(function () {
       },
       success: function(item){
         let itemCoordinates = item['data']['coordinates'];
-        console.log(itemCoordinates);
         let border = L.geoJSON(item['data'],{
           style: function(){
             return{
@@ -396,16 +400,9 @@ $(document).ready(function () {
               weight: 3.5
             }
           }
-        }).addTo(map)
-        let randomNumber = Math.floor(Math.random() * 14);
-        let randomMarker = L.icon({
-        iconUrl: "assets/img/"+iconNames[randomNumber],
-        iconSize: [32,37],
-        iconAnchor: [16,37],
-        popupAnchor: [0, -30]
-        })
+        }).addTo(map);
+        
         if(item['data']['type']=="Polygon"){
-          console.log(item['data']['type'])
           itemCoordinates.forEach(function(coordsArray){
             coordsArray.forEach(function(coords){
               markers.addLayer(L.marker([coords[1],coords[0]], {icon: randomImg()}));
@@ -413,7 +410,6 @@ $(document).ready(function () {
           })
           map.addLayer(markers);
         }else{
-          console.log(item['data']['type'])
           itemCoordinates.forEach(function(outerIndex){
             outerIndex.forEach(function(coordsArray){
               coordsArray.forEach(function(coords){
@@ -424,6 +420,7 @@ $(document).ready(function () {
           map.addLayer(markers);
         }
         map.fitBounds(border.getBounds());
+        
             $.ajax({
             url: 'assets/php/countryInfo.php',
             method: 'GET',
@@ -449,7 +446,6 @@ $(document).ready(function () {
                   let rates = item["rates"];
                   let currencyValue = rates[currencyCode];
                   $('#currencyValue').val(currencyValue);
-                  console.log(currencyValue)
                   let population = details['geonames'][0]['population']
                   population = population.split('')
                   population = population.reverse()
@@ -462,8 +458,6 @@ $(document).ready(function () {
                   population = population.split('')
                   population = population.reverse()
                   population = population.join('')
-                    
-                  console.log(population)
               $('#capitalVal').text(capitalName)
               $('#populationsVal').text(population)
               $('#currencyIdVal').html(`<p>1 USD to ${currencyCode} : ${currencyValue}<p>`)
@@ -534,11 +528,9 @@ $(document).ready(function () {
                   'date': dateOnly
                 },
                 success: function(item){
-                  console.log(item);
                   let news = '';
                   let data = item.data.data;
                   data.forEach(function(headline){
-                    console.log(headline)
                     news += `
                     <div>
                     <h3>${headline.title}</h3>
