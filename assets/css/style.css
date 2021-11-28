@@ -1,5 +1,8 @@
 /* google font */
 @import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Dosis:wght@300&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Padauk&display=swap");
 
 * {
   margin: 0;
@@ -59,8 +62,6 @@ p {
 
 main > #myMap > #countyDropdown {
   position: relative;
-  left: 50vw;
-  transform: translateX(calc(-10vw));
   z-index: 3000;
 }
 /* main > #myMap > #countyDropdown > label {
@@ -77,15 +78,22 @@ main > #myMap > #countyDropdown {
   border-radius: 2em;
 } */
 #country {
-  min-width: 20vw;
   text-align: center;
   border-radius: 2em;
   min-height: 3em;
   margin-top: 1vh;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  min-width: 20vw;
+  font-weight: bold;
 }
 
-main > #myMap > #countyDropdown option {
+main > #myMap > #countyDropdown > #country > .country {
   font-size: 2em;
+}
+main > #myMap > #countyDropdown > #country > .country:focus {
+  min-width: 10vw;
+  width: auto;
 }
 
 main > #myMap > #countyDropdown > select > option:nth-child(odd) {
@@ -109,23 +117,23 @@ main > #myMap > #countyDropdown > select > option:nth-child(even) {
 .leaflet-right {
   margin-top: 3vh;
 }
-.leaflet-right > .leaflet-control-bootstrapmodal:first-child > a {
+.leaflet-right > .leaflet-control-bootstrapmodal:nth-child(2) > a {
   background-image: url("../icons/info.png");
 }
 
-.leaflet-right > .leaflet-control-bootstrapmodal:nth-child(2) > a {
+.leaflet-right > .leaflet-control-bootstrapmodal:nth-child(3) > a {
   background-image: url("../icons/news.png");
 }
 
-.leaflet-right > .leaflet-control-bootstrapmodal:nth-child(3) > a {
+.leaflet-right > .leaflet-control-bootstrapmodal:nth-child(4) > a {
   background-image: url("../icons/covid.png");
 }
 
-.leaflet-right > .leaflet-control-bootstrapmodal:nth-child(4) > a {
+.leaflet-right > .leaflet-control-bootstrapmodal:nth-child(5) > a {
   background-image: url("../icons/weather.png");
 }
 
-.leaflet-right > .leaflet-control-bootstrapmodal:nth-child(5) > a {
+.leaflet-right > .leaflet-control-bootstrapmodal:nth-child(6) > a {
   background-image: url("../icons/webcam.png");
 }
 
@@ -381,6 +389,26 @@ td {
   text-align: center;
   overflow: scroll;
 }
+.news div {
+  border: 3px solid rgb(203, 203, 209);
+  border-radius: 10px;
+  background-color: rgb(203, 203, 209);
+  margin-bottom: 1vh;
+}
+.news div h3 {
+  font-family: "Playfair Display", serif;
+  margin-bottom: 1vh;
+}
+.news div p {
+  font-family: "Dosis", sans-serif;
+  font-weight: 800;
+  margin-bottom: 1vh;
+}
+.news div p:nth-child(3) {
+  font-family: "Padauk", sans-serif;
+  margin-bottom: 1vh;
+}
+
 .news a {
   text-decoration: none;
 }
